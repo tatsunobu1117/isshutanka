@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { ArrowLeftRightIcon } from "lucide-react"
+import { ArrowLeftRight } from "lucide-react"
 
 export default function RealEstateCalculator() {
   // 計算モード（true: 購入価格→一種単価, false: 一種単価→購入価格）
@@ -37,12 +37,12 @@ export default function RealEstateCalculator() {
   const themeColor = forwardCalculation ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
   const buttonColor = forwardCalculation ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
 
-  // 数値をフォーマットする関数（カンマ区切り）
+  // 数値をフォーマットする関数（カンマ区切り、小数点以下1位まで）
   const formatNumber = (value: string) => {
     if (!value) return ""
     const number = Number.parseFloat(value.replace(/,/g, ""))
     if (isNaN(number)) return ""
-    return number.toLocaleString()
+    return number.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
   }
 
   // 数値からカンマを取り除く関数
@@ -79,18 +79,18 @@ export default function RealEstateCalculator() {
         const builtInPrice = purchaseNum / areaInTsuboNum
         const type1Price = builtInPrice / floorAreaRatioNum
 
-        setBuiltInUnitPrice(builtInPrice.toLocaleString())
-        setCalculatedType1UnitPrice(type1Price.toLocaleString())
+        setBuiltInUnitPrice(builtInPrice.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 0 }))
+        setCalculatedType1UnitPrice(type1Price.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 0 }))
       } else {
         setBuiltInUnitPrice("")
         setCalculatedType1UnitPrice("")
       }
     } else {
-      // 一種単価→購入価格の計算
+      // 一種単価→購入価格の計算（経費を引く）
       if (type1UnitPriceNum && areaInSqMetersNum && floorAreaRatioNum) {
-        const expectedPrice = type1UnitPriceNum * areaInTsuboNum * floorAreaRatioNum * bidRate + expensesNum
+        const expectedPrice = (type1UnitPriceNum * areaInTsuboNum * floorAreaRatioNum * bidRate) - expensesNum
 
-        setExpectedPurchasePrice(expectedPrice.toLocaleString())
+        setExpectedPurchasePrice(expectedPrice.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 0 }))
       } else {
         setExpectedPurchasePrice("")
       }
@@ -113,7 +113,7 @@ export default function RealEstateCalculator() {
             </CardDescription>
           </div>
           <Button variant="outline" onClick={toggleCalculationDirection} className={`${buttonColor} text-white`}>
-            <ArrowLeftRightIcon className="h-4 w-4 mr-2" />
+            <ArrowLeftRight className="h-4 w-4 mr-2" />
             計算方向を切替
           </Button>
         </CardHeader>
@@ -148,7 +148,7 @@ export default function RealEstateCalculator() {
                       inputMode="decimal"
                       placeholder="0"
                     />
-                    <div className="text-xs text-muted-foreground">坪数: {areaInTsuboNum.toFixed(2)} 坪</div>
+                    <div className="text-xs text-muted-foreground">坪数: {areaInTsuboNum.toFixed(1)} 坪</div>
                   </div>
 
                   <div className="grid gap-2">
@@ -188,7 +188,7 @@ export default function RealEstateCalculator() {
                       inputMode="decimal"
                       placeholder="0"
                     />
-                    <div className="text-xs text-muted-foreground">坪数: {areaInTsuboNum.toFixed(2)} 坪</div>
+                    <div className="text-xs text-muted-foreground">坪数: {areaInTsuboNum.toFixed(1)} 坪</div>
                   </div>
 
                   <div className="grid gap-2">
@@ -215,7 +215,7 @@ export default function RealEstateCalculator() {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <div className="text-sm font-medium">
-                        {purchasePrice ? `${purchasePrice} 万円` : "購入価格"} ÷ {areaInTsuboNum.toFixed(2)} 坪 =
+                        {purchasePrice ? `${purchasePrice} 万円` : "購入価格"} ÷ {areaInTsuboNum.toFixed(1)} 坪 =
                         建込坪単価
                       </div>
                       <div className="flex justify-between items-center">
@@ -241,8 +241,8 @@ export default function RealEstateCalculator() {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <div className="text-sm font-medium">
-                        {type1UnitPrice ? `${type1UnitPrice} 万円/坪` : "一種単価"} × {areaInTsuboNum.toFixed(2)} 坪 ×{" "}
-                        {floorAreaRatioNum ? (floorAreaRatioNum * 100).toFixed(0) : "容積率"}% × 指値率 + 経費 =
+                        {type1UnitPrice ? `${type1UnitPrice} 万円/坪` : "一種単価"} × {areaInTsuboNum.toFixed(1)} 坪 ×{" "}
+                        {floorAreaRatioNum ? (floorAreaRatioNum * 100).toFixed(0) : "容積率"}% × 指値率 - 経費 =
                         購入期待価格
                       </div>
                       <div className="flex justify-between items-center">
